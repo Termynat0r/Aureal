@@ -55,19 +55,22 @@ class DeviceViewController: NSViewController {
 
         // set up effects list
         effects = [
-            DirectEffect(name: "Rolling Gradient", builder: { colors -> DirectCommand in
-                RollingGradientDirectCommand(colors: colors)
+            DirectEffect(name: "Static", builder: { colors -> Command in
+                StaticCommand(color: colors.first ?? .red)
             }, colorMode: .dynamic),
-            DirectEffect(name: "Gradient", builder: { colors -> DirectCommand in
-                GradientDirectCommand(colors: colors)
+            DirectEffect(name: "Rolling Gradient", builder: { colors -> Command in
+                RollingGradientCommand(colors: colors)
             }, colorMode: .dynamic),
-            DirectEffect(name: "Spaced", builder: { colors -> DirectCommand in
-                SpacedDirectCommand(color: colors.first ?? .red)
+            DirectEffect(name: "Gradient", builder: { colors -> Command in
+                GradientCommand(colors: colors)
+            }, colorMode: .dynamic),
+            DirectEffect(name: "Spaced", builder: { colors -> Command in
+                SpacedCommand(color: colors.first ?? .red)
             }, colorMode: .count(1)),
-            DirectEffect(name: "USA! USA! USA!", builder: { colors -> DirectCommand in
+            DirectEffect(name: "USA! USA! USA!", builder: { colors -> Command in
                 Patriotism🦅DirectCommand()
             }, colorMode: .none)
-        ] + AuraEffect.effects.map { BuiltInEffect(mode: $0) }
+        ]
 
         effectsPopUpButton.removeAllItems()
         for effect in effects {

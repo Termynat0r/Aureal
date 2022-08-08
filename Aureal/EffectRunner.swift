@@ -74,67 +74,40 @@ class EffectRunner {
         guard let device = device else {
             return
         }
-
-        // FIXME: this shouldn't need to know directly about EffectCommand
-        if let effectCommand = command as? EffectCommand {
-            isDirect = false
-            var startLED: UInt8 = 0
-            for auraUSBDevice in allAddressables {
-                let rgbs = auraUSBDevice.type == .addressable
-                    ? [effectCommand.color]
-                    : [CommandColor](repeating: effectCommand.color, count: Int(8))
-
-                try controller.setEffect(effect: effectCommand.effect, effectChannel: auraUSBDevice.effectChannel, to: device.hidDevice)
-                try controller.setColors(
-                    rgbs,
-                    startLED: startLED,
-                    channel: auraUSBDevice.effectChannel,
-                    isFixed: auraUSBDevice.type == .fixed,
-                    to: device.hidDevice
-                )
-
-                startLED += UInt8(rgbs.count)
-            }
-
-            try controller.commit(to: device.hidDevice)
+        
+        guard let command = command else {
+            return
         }
 
-        if let directCommand = command as? DirectCommand {
-            let ledCountPerCommand = 20
+        let ledCountPerCommand = 20
 
-            for auraUSBDevice in allAddressables {
-                if !isDirect {
-                    try controller.setEffect(
-                        effect: .direct,
-                        effectChannel: auraUSBDevice.effectChannel,
-                        to: device.hidDevice
-                    )
-                }
-
-                var startLED: UInt8 = 0
-
-                let rgbs = directCommand.rgbs(
+        for auraUSBDevice in allAddressables {
+            if auraUSBDevice.type == .fixed {
+                try controller.setEffect(
+                    effect: .direct,
+                    effectChannel: auraUSBDevice.effectChannel,
+                    to: device.hidDevice
+                )
+            } else {
+                let rgbs = command.rgbs(
                     capacity: Int(auraUSBDevice.numberOfLEDs),
                     step: step
                 )
-
+                
                 let groups = rgbs.chunked(into: ledCountPerCommand)
                 for (index, group) in groups.enumerated() {
                     try controller.setDirect(
                         group,
-                        startLED: startLED,
+                        startLED: UInt8(index*group.count),
                         channel: auraUSBDevice.directChannel,
                         apply: index >= groups.count - 1,
                         to: device.hidDevice
                     )
-
-                    startLED += UInt8(group.count)
                 }
             }
-
-            isDirect = true
-
-            step += 1
         }
+
+        step += 1
+        
     }
 }

@@ -1,30 +1,12 @@
 import Foundation
 
+
 protocol Command {
     var isAnimated: Bool { get }
-}
-
-protocol DirectCommand: Command {
     func rgbs(capacity: Int, step: Int) -> [CommandColor]
 }
 
-struct EffectCommand: Command {
-    let effect: AuraEffect
-    let color: CommandColor
-
-    let controlMode = AuraControlMode.effect
-
-    init(_ effect: AuraEffect, color: CommandColor) {
-        self.effect = effect
-        self.color = color
-    }
-
-    var isAnimated: Bool {
-        false
-    }
-}
-
-struct StaticDirectCommand: DirectCommand {
+struct StaticCommand: Command {
     let color: CommandColor
 
     var isAnimated: Bool {
@@ -40,7 +22,7 @@ struct StaticDirectCommand: DirectCommand {
     }
 }
 
-struct SpacedDirectCommand: DirectCommand {
+struct SpacedCommand: Command {
     let color: CommandColor
 
     var isAnimated: Bool {
@@ -63,7 +45,7 @@ struct SpacedDirectCommand: DirectCommand {
     }
 }
 
-class GradientDirectCommand: DirectCommand {
+class GradientCommand: Command {
     let gradients: [RGBGradient]
 
     private let colors: [CommandColor]
@@ -121,7 +103,7 @@ class GradientDirectCommand: DirectCommand {
     }
 }
 
-class RollingGradientDirectCommand: GradientDirectCommand {
+class RollingGradientCommand: GradientCommand {
     override init(gradients: [RGBGradient]) {
         guard gradients.count > 0 else {
             super.init(gradients: gradients)
@@ -137,7 +119,7 @@ class RollingGradientDirectCommand: GradientDirectCommand {
     }
 }
 
-struct Patriotism🦅DirectCommand: DirectCommand {
+struct Patriotism🦅DirectCommand: Command {
     let colors = [CommandColor.red, CommandColor.white, CommandColor.blue].stretched(by: 2)
 
     var isAnimated: Bool {
