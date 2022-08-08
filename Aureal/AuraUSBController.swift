@@ -53,7 +53,7 @@ class AuraUSBController {
         try send(
             commandBytes: [
                 AuraCommand,
-                0x40,
+                AuraControlMode.direct.rawValue,
                 (apply ? 0x80 : 0x00) | channel,
                 startLED,
                 UInt8(rgbs.count)
@@ -66,9 +66,8 @@ class AuraUSBController {
     func setEffect(effect: AuraEffect, effectChannel: UInt8, to device: HIDDevice) throws {
         try send(commandBytes: [
             AuraCommand,
-            0x35, // "effect control mode"
+            AuraControlMode.effect.rawValue, // "effect control mode"
             effectChannel,
-            0x0, // unknown
             0x0, // unknown
             UInt8(effect.rawValue),
         ], to: device)
@@ -110,6 +109,12 @@ class AuraUSBController {
             repeating: 0,
             count: AuraCommandLength - commandBytes.count
         )
+        
+        var st = "Sending: "
+        for i in Range(0...4) {
+            st += String(format: "%.02x ", bytes[i])
+        }
+        print(st + " ")
 
         let response = IOHIDDeviceSetReport(
             device.device,

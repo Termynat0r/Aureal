@@ -68,10 +68,25 @@ struct AuraUSBDeviceConfiguration {
 //        2A: 00 00 00 00 00 00
 //        30: 00 00 00 00 00 00
 //        36: 00 00 00 00 00 00
+        
+/* Config for product-id 0x1872:
+
+ 00: 1F FF 04 01 00 02 <- adressable devices says 4, although only 1
+ 06: 00 78 01 3E 00 02 <- adressable device with 0x78 (120) LEDs is correct
+ 0C: 00 78 01 3E 00 02
+ 12: 00 3C 01 3E 00 02
+ 18: 00 00 00 FF 00 00 <- FF mainboard LEDs? Maybe something to do with the required "ec 3b 00 00 ff" command
+ 1E: 00 00 00 00 00 00
+ 24: 00 00 00 00 00 00
+ 2A: 00 00 00 00 00 00
+ 30: 00 00 00 00 00 00
+ 36: 00 00 00 00 00 00
+ 
+ */
     }
 
     var addressableChannelCount: UInt8 {
-        data[0x02]
+        1
     }
 
     var mainboardLEDCount: UInt8 {
@@ -85,16 +100,7 @@ struct AuraUSBDeviceConfiguration {
     func addressableLEDCount(at index: UInt8) -> UInt8 {
         let offset = offsetForDevice(at: index)
 
-        // XXX: custom overrides need to be injected
-        if index == 0 {
-            return 14
-        }
-
-        if index == 1 {
-            return 1
-        }
-
-        return data[offset + 0x0]
+        return data[offset + 0x01]
     }
 
     var rootDevice: AuraConnectedDevice {
